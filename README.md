@@ -20,7 +20,9 @@ This also works with the data of BTC by hours
 ### Twitter Scoring
 I am working on an Twitter algorithm that analyses the tweets of the #bitcoin trends and some of its influencers
 Using the VADER algorithm in NLTK package, I score each tweet using a custom dictionnary
+
 `{'up': 1, 'down': -1, ...}`
+
 The idea is to merge this algo with the RNN to have an indicator that could help predicting prices with better accuracy.
 
 ### Incorporate basic indicators
