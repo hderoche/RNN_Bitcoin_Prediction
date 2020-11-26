@@ -49,10 +49,13 @@ import matplotlib.pyplot as plt
 # Reading data and adding a column to have an index
 dataBtc = pd.read_csv('data_btc.csv', header=0)
 dataBTC = pd.read_csv('price_btc_1h.csv', header=0, sep=',')
-print(dataBTC.head())
+dataBitstamp = pd.read_csv('Bitstamp_BTCUSD_d.csv', header=0, sep=',')
+# This dataset has a column of Timstamp
+dataBitstamp = dataBitstamp.drop(['Unix Timestamp'], axis=1)
+print(dataBitstamp.head())
 
 # Data processing and slicing dataframe in order to have the right dimension to input in the RNN
-data = pd.DataFrame(dataBTC, index=[i for i in range(dataBtc.shape[0])])
+data = pd.DataFrame(dataBitstamp, index=[i for i in range(dataBtc.shape[0])])
 # The datafiles I had were reversed, meaning that the index of the lastest data was 0, so I had to reverse the dataframe
 data = data[::-1]
 data = data.drop(['Date','Symbol', 'Volume USD'], axis=1)
