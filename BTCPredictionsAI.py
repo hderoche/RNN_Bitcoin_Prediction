@@ -60,6 +60,45 @@ data = pd.DataFrame(dataBitstamp, index=[i for i in range(dataBtc.shape[0])])
 data = data[::-1]
 data = data.drop(['Date','Symbol', 'Volume USD'], axis=1)
 
+# RSI integration to the dataset
+
+def RSI(data): 
+    dataLength = data.shape[0]
+    priceUp = []  
+    priceDown = []
+    k = 0
+    while k < dataLength:
+        if k == 0:
+            priceUp.append(0)
+            priceDown.append(0)
+        else:
+            diff = data['Close'][k] - data['Close'][k-1]
+            if diff > 0:
+                priceUp.append(diff)
+                priceDown.append(0)
+            elif diff <= 0:
+                priceDown.append(diff)
+                priceUp.append(0)
+        k+=1
+    avgGain = []
+    avgLoss = []
+    i = 0
+    while i < dataLength:
+        if i < 15:
+            avgGain.append(0)
+            avgLoss.append(0)
+        else:
+            avgGain.append(sum([priceUp[i-l] for l in range(0, 15)]) / 14)
+            avgDown.append(sum([priceDown[i-l] for l in range(0, 15)]) / 14)
+    RS = []
+    RSI = []
+    while m < dataLength:
+        RS_TempValue = avgGain[m]/avgLoss[m]
+        RS.append(RS_TempValue)
+        RSI.append(100 - (100 / (1 + RS_TempValue)))
+        data['RSI'] = RSI
+    return data
+print(RSI(data))
 # Splitting the data
 index = data.shape[0] - np.floor(data.shape[0] * 0.7)
 data_train, data_test = data.loc[:index, :], data.loc[index + 1:, :]
@@ -124,7 +163,7 @@ def AI_model():
     # Here you might want to change the number of units per layers, because my algorithm ran for 25 min until the model was compiled
     # you can also change the number of epoch, to have a better render time.
 
-    model.add(tf.keras.layers.LSTM(units = 60, activation=tf.nn.relu, return_sequences=True, input_shape= (X_train.shape[1], 5)))
+    model.add(tf.keras.layers.LSTM(units = 60, activation=tf.nn.relu, return_sequences=True, input_shape= (X_train.shape[1], X_train.shape[0])))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.LSTM(units=60, activation=tf.nn.relu, return_sequences=True))
     model.add(tf.keras.layers.Dropout(0.2))
