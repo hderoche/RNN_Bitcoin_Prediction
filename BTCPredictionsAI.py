@@ -55,15 +55,15 @@ dataBitstamp = dataBitstamp.drop(['Unix Timestamp'], axis=1)
 print(dataBitstamp.head())
 
 # Data processing and slicing dataframe in order to have the right dimension to input in the RNN
-data = pd.DataFrame(dataBitstamp, index=[i for i in range(dataBtc.shape[0])])
+data = pd.DataFrame(dataBitstamp, index=[i for i in range(dataBitstamp.shape[0])])
 # The datafiles I had were reversed, meaning that the index of the lastest data was 0, so I had to reverse the dataframe
 data = data[::-1]
 data = data.drop(['Date','Symbol', 'Volume USD'], axis=1)
-
+print(data.shape)
 # RSI integration to the dataset
 
 def RSI(data): 
-    dataLength = data.shape[0]
+    dataLength = len(data)
     priceUp = []  
     priceDown = []
     k = 0
@@ -89,16 +89,24 @@ def RSI(data):
             avgLoss.append(0)
         else:
             avgGain.append(sum([priceUp[i-l] for l in range(0, 15)]) / 14)
-            avgDown.append(sum([priceDown[i-l] for l in range(0, 15)]) / 14)
+            avgLoss.append(np.abs(sum([priceDown[i-l] for l in range(0, 15)]) / 14))
+        i += 1
     RS = []
     RSI = []
+    m = 0
     while m < dataLength:
-        RS_TempValue = avgGain[m]/avgLoss[m]
+        if avgGain[m] == 0 and avgLoss[m] == 0:
+            RS_TempValue = 0
+        else: 
+            RS_TempValue = avgGain[m]/avgLoss[m]
         RS.append(RS_TempValue)
-        RSI.append(100 - (100 / (1 + RS_TempValue)))
-        data['RSI'] = RSI
+        RSI_TempValue = 100 - (100 / (1 + RS_TempValue))
+        RSI.append(RSI_TempValue)
+        m += 1
+    data['RSI'] = RSI
     return data
 print(RSI(data))
+print('Shape : ',data.shape)
 # Splitting the data
 index = data.shape[0] - np.floor(data.shape[0] * 0.7)
 data_train, data_test = data.loc[:index, :], data.loc[index + 1:, :]
@@ -163,15 +171,15 @@ def AI_model():
     # Here you might want to change the number of units per layers, because my algorithm ran for 25 min until the model was compiled
     # you can also change the number of epoch, to have a better render time.
 
-    model.add(tf.keras.layers.LSTM(units = 60, activation=tf.nn.relu, return_sequences=True, input_shape= (X_train.shape[1], X_train.shape[0])))
+    model.add(tf.keras.layers.LSTM(units = 3600, activation=tf.nn.relu, return_sequences=True, input_shape= (X_train.shape[1], 6)))
     model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.LSTM(units=60, activation=tf.nn.relu, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(units=3600, activation=tf.nn.relu, return_sequences=True))
     model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.LSTM(units=60, activation=tf.nn.relu, return_sequences=True))
+    model.add(tf.keras.layers.LSTM(units=3600, activation=tf.nn.relu, return_sequences=True))
+    model.add(tf.keras.layers.Dropout(0.2))
+    model.add(tf.keras.layers.LSTM(units=1800, activation=tf.nn.relu, return_sequences=True))
     model.add(tf.keras.layers.Dropout(0.1))
-    model.add(tf.keras.layers.LSTM(units=70, activation=tf.nn.relu, return_sequences=True))
-    model.add(tf.keras.layers.Dropout(0.2))
-    model.add(tf.keras.layers.LSTM(units=120, activation=tf.nn.relu))
+    model.add(tf.keras.layers.LSTM(units=900, activation=tf.nn.relu))
     model.add(tf.keras.layers.Dropout(0.2))
     model.add(tf.keras.layers.Dense(1))
 
@@ -194,10 +202,10 @@ def AI_model():
 
 
 
-#AI_model()
+AI_model()
 
 # Loading the model from the file in the same repository
-new_model = tf.keras.models.load_model('btcAI90%')
+new_model = tf.keras.models.load_model('btcAI')
 
 # Getting the results on the test dataset
 y_preds = new_model.predict(X_test)
