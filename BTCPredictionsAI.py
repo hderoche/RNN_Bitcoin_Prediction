@@ -29,12 +29,6 @@
         - AI learning program (using tensorflow)
         - Analysing & plotting the results
 
-
-    IMPORTANT : 
-    By default, the saved model will be used, if you want to compile your own model, you must:
-        - Uncomment line : 172
-        - Change the string in the : tf.keras.models.load_model('btcAI90%') by changing 'btcAI90%' to 'btcAI', line : 175
-
 """
 
 ####################################################################
@@ -43,7 +37,6 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
-
 import matplotlib.pyplot as plt
 
 # Reading data and adding a column to have an index
@@ -60,8 +53,8 @@ data = pd.DataFrame(dataBitstamp, index=[i for i in range(dataBitstamp.shape[0])
 data = data[::-1]
 data = data.drop(['Date','Symbol', 'Volume USD'], axis=1)
 print(data.shape)
-# RSI integration to the dataset
 
+# RSI integration to the dataset
 def RSI(data): 
     dataLength = len(data)
     priceUp = []  
@@ -105,6 +98,7 @@ def RSI(data):
         m += 1
     data['RSI'] = RSI
     return data
+
 print(RSI(data))
 print('Shape : ',data.shape)
 # Splitting the data
@@ -205,7 +199,7 @@ def AI_model():
 AI_model()
 
 # Loading the model from the file in the same repository
-new_model = tf.keras.models.load_model('btcAI')
+new_model = tf.keras.models.load_model('btcAI90%')
 
 # Getting the results on the test dataset
 y_preds = new_model.predict(X_test)
@@ -223,21 +217,6 @@ print("Last real value : ",y_test[-1])
 print("Last predicted value : ",y_preds[-1])
 
 ####################################################################
-"""
-        Conclusion
-
-    We can see that the graph is following quite nicely the real data, however there is some delay
-    and some gap between the predicted values and the real values. This is mainly due to the great volatility of the market
-
-    Keep in mind that every value of the predicted values list are being predicted using the last 60 and predicting the 61st based
-    on the 60 others. So this is not that bad, eventhough the accuracy metrics is not that good.
-
-    In order to improve the model and get closer result we could add columns to the data frame like if the market went up or down by putting 0 or 1,
-    Or parse data from twitter, or financial blogs, so that we can give an insight to the algorithm of the mindset of the trader and the public opinion.
-
-"""
-####################################################################
-
 """
 Plotting the graph, to visualize the data
 """
