@@ -1,6 +1,6 @@
 # Reccurent Neural Network for Bitcoin Price predictions
 
-**Please use the RNN.ipynb file, where all the analysis is made**
+# **Please use the RNN.ipynb file, where all the analysis is made**
 
 ---
 
